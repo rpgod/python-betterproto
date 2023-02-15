@@ -1044,7 +1044,7 @@ class Message(ABC):
         return cls().parse(data)
 
     def to_dict(
-        self, casing: Casing = Casing.CAMEL, include_default_values: bool = False
+        self, casing: Casing = Casing.CAMEL, include_default_values: bool = False,b64:bool=False
     ) -> Dict[str, Any]:
         """
         Returns a JSON serializable dict representation of this object.
@@ -1143,12 +1143,12 @@ class Message(ABC):
                 elif meta.proto_type == TYPE_BYTES:
                     if field_is_repeated:
                         output[cased_name] = [
-                            b64encode(b).decode("utf8") for b in value
+                           b if not b64 else b64encode(b).decode("utf8") for b in value
                         ]
                     elif value is None and include_default_values:
                         output[cased_name] = value
                     else:
-                        output[cased_name] = b64encode(value).decode("utf8")
+                        output[cased_name] =v if not b64 else b64encode(value).decode("utf8")
                 elif meta.proto_type == TYPE_ENUM:
                     if field_is_repeated:
                         enum_class = field_types[field_name].__args__[0]
@@ -1264,7 +1264,7 @@ class Message(ABC):
         self,
         indent: Union[None, int, str] = None,
         include_default_values: bool = False,
-        casing: Casing = Casing.CAMEL,
+        casing: Casing = Casing.CAMEL
     ) -> str:
         """A helper function to parse the message instance into its JSON
         representation.
@@ -1293,7 +1293,7 @@ class Message(ABC):
             The JSON representation of the message.
         """
         return json.dumps(
-            self.to_dict(include_default_values=include_default_values, casing=casing),
+            self.to_dict(include_default_values=include_default_values, casing=casing,b64=True),
             indent=indent,
         )
 
